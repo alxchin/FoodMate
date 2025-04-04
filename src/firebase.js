@@ -1,7 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore, collection, getDocs, Timestamp, addDoc, query, where, deleteDoc, doc } from 'firebase/firestore';
-
+import { getDatabase, ref, set } from "firebase/database"; 
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -17,6 +17,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app)
+const rtdb = getDatabase(app);
 
 const getFoodItems = async () => {
     const foodItemsCollection = collection(db, 'foodItems');
@@ -29,30 +30,6 @@ const getFoodItems = async () => {
   };
 
 
-const handleLogin = async () => {
-  try {
-    const provider = new GoogleAuthProvider();
-    const result = await signInWithPopup(auth, provider);
-    const user = result.user;
-
-    if (user) {
-      const userRef = doc(db, "users", user.uid); // Set UID as doc ID
-      const userSnap = await getDoc(userRef);
-
-      if (!userSnap.exists()) {
-        // Save user if they don't exist
-        await setDoc(userRef, {
-          uid: user.uid,
-          name: user.displayName || "Anonymous",
-          email: user.email,
-          profilePicture: user.photoURL || "",
-        });
-      }
-    }
-  } catch (error) {
-    console.error("Login error:", error);
-  }
-};
 // Function to add a swipe to Firestore
 const addSwipe = async (userId, foodId, swipe) => {
     try {
@@ -148,6 +125,25 @@ export const addFriend = async (friendEmail) => {
       console.error("Error removing friend:", error);
     }
   };
+
+
+  export const setOnlineStatus = (userId) => {
+    const db = getDatabase();
+    const userRef = ref(db, "onlineUsers/" + userId);
+    set(userRef, {
+      online: true,
+    });
+  };
+  
+  // Function to set user as offline
+  export const setOfflineStatus = (userId) => {
+    const db = getDatabase();
+    const userRef = ref(db, "onlineUsers/" + userId);
+    set(userRef, {
+      online: false,
+    });
+  };
+
   
   // Exporting Firebase config, auth, db, and addSwipe function
-  export { auth, db, addSwipe, getFoodItems };
+  export { auth, db, rtdb, addSwipe, getFoodItems };
