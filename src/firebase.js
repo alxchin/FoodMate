@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, collection, getDocs, Timestamp, addDoc, query, where, deleteDoc, doc } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, Timestamp, addDoc, query, where, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
 import { getDatabase, ref, set } from "firebase/database"; 
 
 // Your web app's Firebase configuration
@@ -37,7 +37,7 @@ const addSwipe = async (userId, foodId, swipe) => {
         userId: userId,      // Type: string (user's ID)
         foodId: foodId,      // Type: string (food item's ID)
         swipe: swipe,        // Type: string ("yes" or "no")
-        timestamp: Timestamp.now(), // Type: timestamp
+        timestamp: serverTimestamp(), // Type: timestamp
       });
       console.log("Swipe added successfully!");
     } catch (e) {
@@ -81,7 +81,7 @@ export const addFriend = async (friendEmail) => {
       user1: user.uid,
       user2: friendId,
       status: "pending",
-      timestamp: new Date(),
+      timestamp: serverTimestamp()
     });
 
     console.log("Friend request sent!");
@@ -144,6 +144,32 @@ export const addFriend = async (friendEmail) => {
     });
   };
 
+  export const sendEatInvite = async (senderUid, receiverUid) => {
+    try {
+      // Create a new invite in the database, likely a collection named "invites"
+      await addDoc(collection(db, "invites"), {
+        senderUid,
+        receiverUid,
+        status: "pending", // Set the status to pending for now
+        timestamp: new Date(),
+      });
+      console.log("Eat invite sent successfully");
+    } catch (error) {
+      console.error("Error sending invite:", error);
+    }
+  };
   
+  export const acceptInvite = async (sessionId) => {
+    await updateDoc(doc(db, 'eatSessions', sessionId), {
+      status: 'accepted'
+    });
+  };
+  
+  export const declineInvite = async (sessionId) => {
+    await updateDoc(doc(db, 'eatSessions', sessionId), {
+      status: 'declined'
+    });
+  };
+
   // Exporting Firebase config, auth, db, and addSwipe function
   export { auth, db, rtdb, addSwipe, getFoodItems };

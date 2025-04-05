@@ -5,6 +5,7 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth, getFoodItems } from '../firebase';
 import { useNavigate } from 'react-router-dom';
 import { Link } from "react-router-dom";
+import { useParams } from 'react-router-dom';
 
 <Link to="/friends">Go to Friends List</Link>
 const FoodSwipe = () => {
@@ -13,6 +14,8 @@ const FoodSwipe = () => {
   const [user] = useAuthState(auth);  // Get the current user from Firebase Auth
   const userId = user ? user.uid : null;
   const navigate = useNavigate();
+  const { sessionId } = useParams();
+  console.log("Session ID:", sessionId);
 
   useEffect(() => {
     // Fetch food items when the component mounts
@@ -53,6 +56,7 @@ const FoodSwipe = () => {
 
   return (
     <div {...handlers} style={{ touchAction: 'none' }}>
+       <h2>Food Swipe for Session: {sessionId}</h2>
       {foodItems.length > 0 ? (
         <div>
           <h3>{foodItems[currentIndex].name}</h3>
