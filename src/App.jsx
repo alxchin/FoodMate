@@ -8,12 +8,16 @@ import PresenceHandler from './components/PresenceHandler';
 import Logout from "./components/Logout";
 import ProtectedRoute from "./components/ProtectedRoute"; 
 import Eats from "./components/Eats";
+import InviteListener from "./components/InviteListener";
+import SessionStatusListener from "./components/SessionStatusListener";
 
 
 const App = () => {
   return (
     <Router>
       <PresenceHandler />
+      <InviteListener />
+      <SessionStatusListener />
       <Routes>
         {/* Public route */}
         <Route path="/" element={<Login />} />

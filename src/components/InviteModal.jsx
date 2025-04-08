@@ -1,14 +1,14 @@
 import React from "react";
-import "../styles/InviteModal.css"
+import "../styles/InviteModal.css";
 
-const InviteModal = ({ isOpen, onClose, onAccept, onDecline, friendEmail }) => {
-  if (!isOpen) return null; // If modal isn't open, don't render it.
+const InviteModal = ({ isOpen, onClose, onAccept, onDecline, inviterEmail }) => {
+  if (!isOpen) return null;
 
   return (
     <div className="modal-overlay">
       <div className="modal">
         <h2>You've been invited to eat!</h2>
-        <p>Do you want to accept the invitation from {friendEmail}?</p>
+        <p>Do you want to accept the invitation from <strong>{inviterEmail}</strong>?</p>
         <div>
           <button onClick={onAccept}>Accept</button>
           <button onClick={onDecline}>Decline</button>
