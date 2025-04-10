@@ -3,9 +3,11 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore, collection, getDocs, Timestamp, addDoc, query, where, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
 import { getDatabase, ref, set } from "firebase/database"; 
 
+
+const apiKey = import.meta.env.VITE_FOODMATE_API_KEY
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyBtHf8WfvkxxYLa6knExd1A6X--fXSQOKY",
+  apiKey: apiKey,
   authDomain: "foodmateca.firebaseapp.com",
   projectId: "foodmateca",
   storageBucket: "foodmateca.firebasestorage.app",

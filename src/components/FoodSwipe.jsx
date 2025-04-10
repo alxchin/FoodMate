@@ -1,75 +1,82 @@
-import React, { useState, useEffect } from 'react';
-import { useSwipeable } from 'react-swipeable';
-import { addSwipe } from '../firebase';
-import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth, getFoodItems } from '../firebase';
-import { useNavigate } from 'react-router-dom';
-import { Link } from "react-router-dom";
-import { useParams } from 'react-router-dom';
+import React, { useState } from "react";
+import { useSwipeable } from "react-swipeable";
+import { motion } from "framer-motion";
+import categories from "../data/categories";
 
-<Link to="/friends">Go to Friends List</Link>
 const FoodSwipe = () => {
-  const [foodItems, setFoodItems] = useState([]);  // State to store food items
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [user] = useAuthState(auth);  // Get the current user from Firebase Auth
-  const userId = user ? user.uid : null;
-  const navigate = useNavigate();
-  const { sessionId } = useParams();
-  console.log("Session ID:", sessionId);
-
-  useEffect(() => {
-    // Fetch food items when the component mounts
-    const fetchFoodItems = async () => {
-      try {
-        const items = await getFoodItems();
-        setFoodItems(items);  // Set the food items to state
-      } catch (error) {
-        console.error("Error fetching food items:", error);
-      }
-    };
-
-    fetchFoodItems();
-  }, []);  // Empty dependency array to run only once when the component mounts
-
-  if (!userId) {
-    navigate('/login');
-    return null;  // Don't render the swipe section if user is not logged in
-  }
+  const [index, setIndex] = useState(0);
+  const currentCategory = categories[index];
 
   const handlers = useSwipeable({
-    onSwipedLeft: () => handleSwipe('no'),
-    onSwipedRight: () => handleSwipe('yes'),
-    preventDefaultTouchmoveEvent: true,
+    onSwipedLeft: () => {
+      setIndex((prev) => (prev + 1) % categories.length); // Move to next category
+    },
+    onSwipedRight: () => {
+      alert(`You selected: ${currentCategory.name}`);
+    },
     trackMouse: true,
+    preventScrollOnSwipe: true,
   });
 
-  const handleSwipe = async (swipe) => {
-    const item = foodItems[currentIndex];
+  // Function to prevent image dragging and right-click
+  const handleDragStart = (e) => {
+    e.preventDefault(); // Disable image dragging
+  };
 
-    try {
-      await addSwipe(userId, item.id, swipe);
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % foodItems.length);
-    } catch (e) {
-      console.error('Error adding swipe: ', e);
-    }
+  const handleContextMenu = (e) => {
+    e.preventDefault(); // Disable right-click context menu
   };
 
   return (
-    <div {...handlers} style={{ touchAction: 'none' }}>
-       <h2>Food Swipe for Session: {sessionId}</h2>
-      {foodItems.length > 0 ? (
-        <div>
-          <h3>{foodItems[currentIndex].name}</h3>
-          <p>{foodItems[currentIndex].location}</p>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        padding: "2rem",
+        userSelect: "none",
+      }}
+    >
+      <h2>Swipe through categories</h2>
+      <div
+        style={{
+          width: "300px",
+          height: "300px",
+          borderRadius: "1rem",
+          overflow: "hidden",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+          marginBottom: "1rem",
+          position: "relative",
+        }}
+      >
+        {/* Add swipeable handler directly to the image */}
+        <motion.div
+          {...handlers} // Attach swipe handlers here
+          style={{
+            position: "absolute",
+            width: "100%",
+            height: "100%",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
           <img
-            src={foodItems[currentIndex].image}
-            alt={foodItems[currentIndex].name}
-            width="150"
+            src={`${currentCategory.image}`}
+            alt={currentCategory.name}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              cursor: "grab", // Show a grab cursor for swiping
+            }}
+            onDragStart={handleDragStart} // Prevent image dragging
+            onContextMenu={handleContextMenu} // Disable right-click
           />
-        </div>
-      ) : (
-        <p>Loading food items...</p>
-      )}
+        </motion.div>
+      </div>
+      <h3>{currentCategory.name}</h3>
+      <p>Swipe left to skip, right to choose</p>
     </div>
   );
 };
